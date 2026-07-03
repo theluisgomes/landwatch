@@ -1,0 +1,170 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Override Leaflet z-index to work properly with glassmorphism overlays */
+.leaflet-pane { z-index: 10; }
+.leaflet-tile-pane { z-index: 10; }
+.leaflet-overlay-pane { z-index: 11; }
+.leaflet-marker-pane { z-index: 12; }
+.leaflet-tooltip-pane { z-index: 13; }
+.leaflet-popup-pane { z-index: 14; }
+.leaflet-top, .leaflet-bottom { z-index: 15; }
+
+/* Glassmorphism base */
+.glass {
+  background: rgba(10, 26, 15, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(52, 211, 153, 0.12);
+}
+
+.glass-light {
+  background: rgba(18, 35, 24, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(52, 211, 153, 0.15);
+}
+
+/* Score gauge */
+.gauge-ring {
+  transform-origin: center;
+  transform: rotate(-225deg);
+  transition: stroke-dashoffset 1.2s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0a1a0f;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #2d6a4f;
+  border-radius: 2px;
+}
+
+/* Map custom markers */
+.productivity-marker {
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.6);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.alert-pulse {
+  animation: alertPulse 2s ease-in-out infinite;
+}
+
+@keyframes alertPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+/* Sidebar transition */
+.sidebar-enter {
+  animation: slideRight 0.3s ease-out;
+}
+
+.panel-enter {
+  animation: slideLeft 0.35s ease-out;
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Timeline slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, #22c55e var(--progress, 50%), #1b4332 var(--progress, 50%));
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #22c55e;
+  margin-top: -7px;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+  border: 2px solid #0a1a0f;
+}
+
+/* Recharts overrides */
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: #74c69d !important;
+  font-size: 11px;
+}
+
+/* Stat counter */
+.stat-value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Badge styles */
+.badge-productive {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+.badge-declining {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}
+
+.badge-degraded {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.badge-recovering {
+  background: rgba(96, 165, 250, 0.15);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  color: #93c5fd;
+}
+
+/* Leaflet polygon styling (injected via JS, defined here for reference) */
+.leaflet-interactive:focus {
+  outline: none;
+}
+
+/* Tooltip map */
+.leaflet-tooltip {
+  background: rgba(10, 26, 15, 0.9) !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+  color: #d8f3dc !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 12px !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  backdrop-filter: blur(8px);
+}
+
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(52, 211, 153, 0.3) !important;
+}
