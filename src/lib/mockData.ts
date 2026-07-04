@@ -10,6 +10,8 @@ export interface YearlyScore {
   year: number;
   score: number;              // 0–100 produtividade calculada
   ndvi_proxy: number;         // 0–1 proxy de NDVI
+  osavi_proxy: number;        // 0–1 proxy de OSAVI
+  soil_moisture: number;      // 0–1 proxy de umidade do solo
   embedding_change: number;   // dot product com ano anterior (1=idêntico, -1=oposto)
   label: string;              // contexto do ano (El Niño, seca, etc.)
 }
@@ -29,6 +31,11 @@ export interface Recommendation {
   title: string;
   description: string;
   estimated_impact: string;
+  traits?: {
+    scientificName?: string;
+    rootDepth?: string;
+    waterNeeds?: 'low' | 'medium' | 'high';
+  };
 }
 
 export interface PropertyData {
@@ -72,14 +79,14 @@ export const MOCK_PROPERTIES: PropertyData[] = [
       [-12.240, -55.580],
     ],
     scores: [
-      { year: 2017, score: 82, ndvi_proxy: 0.71, embedding_change: 1.0, label: 'Ano base' },
-      { year: 2018, score: 79, ndvi_proxy: 0.68, embedding_change: 0.94, label: 'Leve queda' },
-      { year: 2019, score: 77, ndvi_proxy: 0.66, embedding_change: 0.91, label: 'Expansão de soja' },
-      { year: 2020, score: 74, ndvi_proxy: 0.63, embedding_change: 0.88, label: 'Seca regional' },
-      { year: 2021, score: 71, ndvi_proxy: 0.60, embedding_change: 0.85, label: 'Seca severa MT' },
-      { year: 2022, score: 73, ndvi_proxy: 0.62, embedding_change: 0.89, label: 'Recuperação parcial' },
-      { year: 2023, score: 68, ndvi_proxy: 0.57, embedding_change: 0.82, label: 'El Niño 2023' },
-      { year: 2024, score: 65, ndvi_proxy: 0.55, embedding_change: 0.80, label: 'Queda acumulada' },
+      { year: 2017, score: 82, ndvi_proxy: 0.71, osavi_proxy: 0.66, soil_moisture: 0.72, embedding_change: 1.0, label: 'Ano base' },
+      { year: 2018, score: 79, ndvi_proxy: 0.68, osavi_proxy: 0.64, soil_moisture: 0.69, embedding_change: 0.94, label: 'Leve queda' },
+      { year: 2019, score: 77, ndvi_proxy: 0.66, osavi_proxy: 0.62, soil_moisture: 0.65, embedding_change: 0.91, label: 'Expansão de soja' },
+      { year: 2020, score: 74, ndvi_proxy: 0.63, osavi_proxy: 0.59, soil_moisture: 0.48, embedding_change: 0.88, label: 'Seca regional' },
+      { year: 2021, score: 71, ndvi_proxy: 0.6, osavi_proxy: 0.57, soil_moisture: 0.34, embedding_change: 0.85, label: 'Seca severa MT' },
+      { year: 2022, score: 73, ndvi_proxy: 0.62, osavi_proxy: 0.59, soil_moisture: 0.6, embedding_change: 0.89, label: 'Recuperação parcial' },
+      { year: 2023, score: 68, ndvi_proxy: 0.57, osavi_proxy: 0.54, soil_moisture: 0.29, embedding_change: 0.82, label: 'El Niño 2023' },
+      { year: 2024, score: 65, ndvi_proxy: 0.55, osavi_proxy: 0.52, soil_moisture: 0.45, embedding_change: 0.80, label: 'Queda acumulada' },
     ],
     current_score: 65,
     status: 'declining',
@@ -107,6 +114,7 @@ export const MOCK_PROPERTIES: PropertyData[] = [
         title: 'Implementar rotação soja–milho–pastagem',
         description: 'A alternância de culturas com pastagem plantada recupera matéria orgânica do solo. Estimativa: recuperação de 8–12 pontos de score em 2 anos.',
         estimated_impact: '+10 pontos de score estimados',
+        traits: { scientificName: 'Glycine max / Zea mays / Brachiaria', rootDepth: 'Profunda (até 1.5m)', waterNeeds: 'medium' },
       },
       {
         id: 'r002',
@@ -115,6 +123,7 @@ export const MOCK_PROPERTIES: PropertyData[] = [
         title: 'Plantio direto com cobertura de palhada',
         description: 'Reduz erosão e mantém umidade do solo. Cerrado perde 30% mais umidade após El Niño em solo exposto.',
         estimated_impact: 'Redução de 40% da erosão',
+        traits: { scientificName: 'Pennisetum glaucum (Milheto)', rootDepth: 'Média (até 1.0m)', waterNeeds: 'low' },
       },
       {
         id: 'r003',
@@ -144,14 +153,14 @@ export const MOCK_PROPERTIES: PropertyData[] = [
       [-12.780, -55.680],
     ],
     scores: [
-      { year: 2017, score: 88, ndvi_proxy: 0.76, embedding_change: 1.0, label: 'Pico de produção' },
-      { year: 2018, score: 91, ndvi_proxy: 0.79, embedding_change: 0.97, label: 'Expansão irrigada' },
-      { year: 2019, score: 89, ndvi_proxy: 0.77, embedding_change: 0.95, label: 'Estável' },
-      { year: 2020, score: 85, ndvi_proxy: 0.74, embedding_change: 0.92, label: 'Seca pontual' },
-      { year: 2021, score: 84, ndvi_proxy: 0.73, embedding_change: 0.91, label: 'Recuperação rápida' },
-      { year: 2022, score: 87, ndvi_proxy: 0.75, embedding_change: 0.94, label: 'Safra recorde' },
-      { year: 2023, score: 83, ndvi_proxy: 0.72, embedding_change: 0.90, label: 'El Niño impacto leve' },
-      { year: 2024, score: 86, ndvi_proxy: 0.74, embedding_change: 0.93, label: 'Recuperação em curso' },
+      { year: 2017, score: 88, ndvi_proxy: 0.76, osavi_proxy: 0.71, soil_moisture: 0.73, embedding_change: 1.0, label: 'Pico de produção' },
+      { year: 2018, score: 91, ndvi_proxy: 0.79, osavi_proxy: 0.74, soil_moisture: 0.71, embedding_change: 0.97, label: 'Expansão irrigada' },
+      { year: 2019, score: 89, ndvi_proxy: 0.77, osavi_proxy: 0.72, soil_moisture: 0.67, embedding_change: 0.95, label: 'Estável' },
+      { year: 2020, score: 85, ndvi_proxy: 0.74, osavi_proxy: 0.69, soil_moisture: 0.5, embedding_change: 0.92, label: 'Seca pontual' },
+      { year: 2021, score: 84, ndvi_proxy: 0.73, osavi_proxy: 0.68, soil_moisture: 0.37, embedding_change: 0.91, label: 'Recuperação rápida' },
+      { year: 2022, score: 87, ndvi_proxy: 0.75, osavi_proxy: 0.7, soil_moisture: 0.63, embedding_change: 0.94, label: 'Safra recorde' },
+      { year: 2023, score: 83, ndvi_proxy: 0.72, osavi_proxy: 0.67, soil_moisture: 0.32, embedding_change: 0.90, label: 'El Niño impacto leve' },
+      { year: 2024, score: 86, ndvi_proxy: 0.74, osavi_proxy: 0.69, soil_moisture: 0.49, embedding_change: 0.93, label: 'Recuperação em curso' },
     ],
     current_score: 86,
     status: 'productive',
@@ -172,6 +181,7 @@ export const MOCK_PROPERTIES: PropertyData[] = [
         title: 'Ampliar APP e reserva legal',
         description: 'Propriedade pode explorar créditos de carbono com ampliação de vegetação nativa além do CAR.',
         estimated_impact: 'Potencial de R$180/ha em créditos de carbono',
+        traits: { scientificName: 'Hymenaea courbaril (Jatobá)', rootDepth: 'Muito Profunda (2m+)', waterNeeds: 'medium' },
       },
     ],
   },
@@ -193,14 +203,14 @@ export const MOCK_PROPERTIES: PropertyData[] = [
       [-18.080, -51.780],
     ],
     scores: [
-      { year: 2017, score: 61, ndvi_proxy: 0.52, embedding_change: 1.0, label: 'Estado inicial' },
-      { year: 2018, score: 55, ndvi_proxy: 0.46, embedding_change: 0.87, label: 'Abandono parcial' },
-      { year: 2019, score: 47, ndvi_proxy: 0.39, embedding_change: 0.76, label: 'Degradação avançando' },
-      { year: 2020, score: 38, ndvi_proxy: 0.31, embedding_change: 0.65, label: 'Solo exposto detectado' },
-      { year: 2021, score: 33, ndvi_proxy: 0.27, embedding_change: 0.60, label: 'Crítico — pior ano' },
-      { year: 2022, score: 35, ndvi_proxy: 0.29, embedding_change: 0.63, label: 'Início de recuperação' },
-      { year: 2023, score: 41, ndvi_proxy: 0.34, embedding_change: 0.70, label: 'Recuperação em curso' },
-      { year: 2024, score: 48, ndvi_proxy: 0.41, embedding_change: 0.78, label: 'Tendência positiva' },
+      { year: 2017, score: 61, ndvi_proxy: 0.52, osavi_proxy: 0.5, soil_moisture: 0.68, embedding_change: 1.0, label: 'Estado inicial' },
+      { year: 2018, score: 55, ndvi_proxy: 0.46, osavi_proxy: 0.44, soil_moisture: 0.64, embedding_change: 0.87, label: 'Abandono parcial' },
+      { year: 2019, score: 47, ndvi_proxy: 0.39, osavi_proxy: 0.38, soil_moisture: 0.6, embedding_change: 0.76, label: 'Degradação avançando' },
+      { year: 2020, score: 38, ndvi_proxy: 0.31, osavi_proxy: 0.31, soil_moisture: 0.41, embedding_change: 0.65, label: 'Solo exposto detectado' },
+      { year: 2021, score: 33, ndvi_proxy: 0.27, osavi_proxy: 0.28, soil_moisture: 0.27, embedding_change: 0.60, label: 'Crítico — pior ano' },
+      { year: 2022, score: 35, ndvi_proxy: 0.29, osavi_proxy: 0.3, soil_moisture: 0.54, embedding_change: 0.63, label: 'Início de recuperação' },
+      { year: 2023, score: 41, ndvi_proxy: 0.34, osavi_proxy: 0.34, soil_moisture: 0.25, embedding_change: 0.70, label: 'Recuperação em curso' },
+      { year: 2024, score: 48, ndvi_proxy: 0.41, osavi_proxy: 0.4, soil_moisture: 0.42, embedding_change: 0.78, label: 'Tendência positiva' },
     ],
     current_score: 48,
     status: 'recovering',
@@ -228,6 +238,7 @@ export const MOCK_PROPERTIES: PropertyData[] = [
         title: 'Manter pastagem rotacionada com braquiária',
         description: 'A cobertura vegetal detectada indica início de recuperação. Pastagem rotacionada evita recompactação do solo.',
         estimated_impact: '+20 pontos de score em 3 anos',
+        traits: { scientificName: 'Urochloa decumbens', rootDepth: 'Profunda (até 1.2m)', waterNeeds: 'low' },
       },
       {
         id: 'r006',
@@ -236,6 +247,7 @@ export const MOCK_PROPERTIES: PropertyData[] = [
         title: 'Reflorestamento de faixas de APP',
         description: 'Áreas de preservação permanente detectadas como solo exposto. Replantio urgente para evitar multas e erosão.',
         estimated_impact: 'Compliance CAR + redução de erosão hídrica',
+        traits: { scientificName: 'Cedrela fissilis (Cedro-rosa)', rootDepth: 'Profunda (1.5m+)', waterNeeds: 'medium' },
       },
     ],
   },
@@ -257,14 +269,14 @@ export const MOCK_PROPERTIES: PropertyData[] = [
       [-7.280, -55.080],
     ],
     scores: [
-      { year: 2017, score: 78, ndvi_proxy: 0.67, embedding_change: 1.0, label: 'Uso misto floresta-pastagem' },
-      { year: 2018, score: 70, ndvi_proxy: 0.59, embedding_change: 0.86, label: 'Desmatamento detectado' },
-      { year: 2019, score: 58, ndvi_proxy: 0.48, embedding_change: 0.74, label: 'Queimadas 2019' },
-      { year: 2020, score: 44, ndvi_proxy: 0.36, embedding_change: 0.61, label: 'Conversão agropecuária' },
-      { year: 2021, score: 37, ndvi_proxy: 0.29, embedding_change: 0.55, label: 'Solo degradado' },
-      { year: 2022, score: 34, ndvi_proxy: 0.27, embedding_change: 0.52, label: 'Pior ano — intervenção necessária' },
-      { year: 2023, score: 36, ndvi_proxy: 0.29, embedding_change: 0.55, label: 'Estabilização mínima' },
-      { year: 2024, score: 39, ndvi_proxy: 0.32, embedding_change: 0.58, label: 'Tímida recuperação' },
+      { year: 2017, score: 78, ndvi_proxy: 0.67, osavi_proxy: 0.63, soil_moisture: 0.71, embedding_change: 1.0, label: 'Uso misto floresta-pastagem' },
+      { year: 2018, score: 70, ndvi_proxy: 0.59, osavi_proxy: 0.56, soil_moisture: 0.67, embedding_change: 0.86, label: 'Desmatamento detectado' },
+      { year: 2019, score: 58, ndvi_proxy: 0.48, osavi_proxy: 0.46, soil_moisture: 0.62, embedding_change: 0.74, label: 'Queimadas 2019' },
+      { year: 2020, score: 44, ndvi_proxy: 0.36, osavi_proxy: 0.36, soil_moisture: 0.42, embedding_change: 0.61, label: 'Conversão agropecuária' },
+      { year: 2021, score: 37, ndvi_proxy: 0.29, osavi_proxy: 0.3, soil_moisture: 0.28, embedding_change: 0.55, label: 'Solo degradado' },
+      { year: 2022, score: 34, ndvi_proxy: 0.27, osavi_proxy: 0.28, soil_moisture: 0.53, embedding_change: 0.52, label: 'Pior ano — intervenção necessária' },
+      { year: 2023, score: 36, ndvi_proxy: 0.29, osavi_proxy: 0.3, soil_moisture: 0.24, embedding_change: 0.55, label: 'Estabilização mínima' },
+      { year: 2024, score: 39, ndvi_proxy: 0.32, osavi_proxy: 0.32, soil_moisture: 0.4, embedding_change: 0.58, label: 'Tímida recuperação' },
     ],
     current_score: 39,
     status: 'degraded',
@@ -292,6 +304,7 @@ export const MOCK_PROPERTIES: PropertyData[] = [
         title: 'Acionar programa de recuperação de pastagens degradadas (RP) do ABC+',
         description: 'Programa federal oferece crédito rural com juros subsidiados para recuperação de pastagens. Propriedade se qualifica.',
         estimated_impact: 'Acesso a R$2.5M em crédito rural a 6% a.a.',
+        traits: { scientificName: 'Megathyrsus maximus (Mombaça)', rootDepth: 'Profunda (até 1.5m)', waterNeeds: 'medium' },
       },
       {
         id: 'r008',
@@ -321,14 +334,14 @@ export const MOCK_PROPERTIES: PropertyData[] = [
       [-20.080, -54.180],
     ],
     scores: [
-      { year: 2017, score: 72, ndvi_proxy: 0.62, embedding_change: 1.0, label: 'Pastagem extensiva' },
-      { year: 2018, score: 74, ndvi_proxy: 0.64, embedding_change: 0.96, label: 'Melhoria gradual' },
-      { year: 2019, score: 76, ndvi_proxy: 0.65, embedding_change: 0.97, label: 'Introdução ILPF' },
-      { year: 2020, score: 78, ndvi_proxy: 0.67, embedding_change: 0.98, label: 'ILPF consolidado' },
-      { year: 2021, score: 80, ndvi_proxy: 0.69, embedding_change: 0.99, label: 'Produtividade crescente' },
-      { year: 2022, score: 83, ndvi_proxy: 0.72, embedding_change: 0.99, label: 'Melhor ano histórico' },
-      { year: 2023, score: 81, ndvi_proxy: 0.70, embedding_change: 0.97, label: 'Leve queda El Niño' },
-      { year: 2024, score: 82, ndvi_proxy: 0.71, embedding_change: 0.98, label: 'Estável e em alta' },
+      { year: 2017, score: 72, ndvi_proxy: 0.62, osavi_proxy: 0.59, soil_moisture: 0.7, embedding_change: 1.0, label: 'Pastagem extensiva' },
+      { year: 2018, score: 74, ndvi_proxy: 0.64, osavi_proxy: 0.6, soil_moisture: 0.68, embedding_change: 0.96, label: 'Melhoria gradual' },
+      { year: 2019, score: 76, ndvi_proxy: 0.65, osavi_proxy: 0.61, soil_moisture: 0.65, embedding_change: 0.97, label: 'Introdução ILPF' },
+      { year: 2020, score: 78, ndvi_proxy: 0.67, osavi_proxy: 0.63, soil_moisture: 0.48, embedding_change: 0.98, label: 'ILPF consolidado' },
+      { year: 2021, score: 80, ndvi_proxy: 0.69, osavi_proxy: 0.65, soil_moisture: 0.36, embedding_change: 0.99, label: 'Produtividade crescente' },
+      { year: 2022, score: 83, ndvi_proxy: 0.72, osavi_proxy: 0.67, soil_moisture: 0.62, embedding_change: 0.99, label: 'Melhor ano histórico' },
+      { year: 2023, score: 81, ndvi_proxy: 0.7, osavi_proxy: 0.66, soil_moisture: 0.32, embedding_change: 0.97, label: 'Leve queda El Niño' },
+      { year: 2024, score: 82, ndvi_proxy: 0.71, osavi_proxy: 0.66, soil_moisture: 0.48, embedding_change: 0.98, label: 'Estável e em alta' },
     ],
     current_score: 82,
     status: 'productive',
@@ -370,14 +383,14 @@ export const MOCK_PROPERTIES: PropertyData[] = [
       [-19.480, -47.680],
     ],
     scores: [
-      { year: 2017, score: 69, ndvi_proxy: 0.59, embedding_change: 1.0, label: 'Cana-de-açúcar' },
-      { year: 2018, score: 66, ndvi_proxy: 0.56, embedding_change: 0.91, label: 'Mudança cultural' },
-      { year: 2019, score: 59, ndvi_proxy: 0.49, embedding_change: 0.83, label: 'Transição' },
-      { year: 2020, score: 52, ndvi_proxy: 0.43, embedding_change: 0.77, label: 'Implantação soja' },
-      { year: 2021, score: 55, ndvi_proxy: 0.46, embedding_change: 0.80, label: 'Adaptação' },
-      { year: 2022, score: 60, ndvi_proxy: 0.51, embedding_change: 0.85, label: 'Primeira safra ok' },
-      { year: 2023, score: 57, ndvi_proxy: 0.48, embedding_change: 0.82, label: 'El Niño impacto' },
-      { year: 2024, score: 62, ndvi_proxy: 0.53, embedding_change: 0.87, label: 'Recuperação' },
+      { year: 2017, score: 69, ndvi_proxy: 0.59, osavi_proxy: 0.56, soil_moisture: 0.7, embedding_change: 1.0, label: 'Cana-de-açúcar' },
+      { year: 2018, score: 66, ndvi_proxy: 0.56, osavi_proxy: 0.53, soil_moisture: 0.66, embedding_change: 0.91, label: 'Mudança cultural' },
+      { year: 2019, score: 59, ndvi_proxy: 0.49, osavi_proxy: 0.47, soil_moisture: 0.62, embedding_change: 0.83, label: 'Transição' },
+      { year: 2020, score: 52, ndvi_proxy: 0.43, osavi_proxy: 0.42, soil_moisture: 0.44, embedding_change: 0.77, label: 'Implantação soja' },
+      { year: 2021, score: 55, ndvi_proxy: 0.46, osavi_proxy: 0.44, soil_moisture: 0.31, embedding_change: 0.80, label: 'Adaptação' },
+      { year: 2022, score: 60, ndvi_proxy: 0.51, osavi_proxy: 0.49, soil_moisture: 0.58, embedding_change: 0.85, label: 'Primeira safra ok' },
+      { year: 2023, score: 57, ndvi_proxy: 0.48, osavi_proxy: 0.46, soil_moisture: 0.28, embedding_change: 0.82, label: 'El Niño impacto' },
+      { year: 2024, score: 62, ndvi_proxy: 0.53, osavi_proxy: 0.51, soil_moisture: 0.45, embedding_change: 0.87, label: 'Recuperação' },
     ],
     current_score: 62,
     status: 'declining',
@@ -419,14 +432,14 @@ export const MOCK_PROPERTIES: PropertyData[] = [
       [-10.970, -45.470],
     ],
     scores: [
-      { year: 2017, score: 85, ndvi_proxy: 0.73, embedding_change: 1.0, label: 'Ano base produtivo' },
-      { year: 2018, score: 87, ndvi_proxy: 0.75, embedding_change: 0.98, label: 'Expansão de área' },
-      { year: 2019, score: 82, ndvi_proxy: 0.70, embedding_change: 0.92, label: 'Estiagem no Matopiba' },
-      { year: 2020, score: 79, ndvi_proxy: 0.68, embedding_change: 0.90, label: 'Seca regional prolongada' },
-      { year: 2021, score: 84, ndvi_proxy: 0.72, embedding_change: 0.94, label: 'Clima favorável' },
-      { year: 2022, score: 89, ndvi_proxy: 0.77, embedding_change: 0.96, label: 'Safra recorde de soja' },
-      { year: 2023, score: 88, ndvi_proxy: 0.76, embedding_change: 0.96, label: 'Manejo otimizado' },
-      { year: 2024, score: 86, ndvi_proxy: 0.74, embedding_change: 0.95, label: 'Produção consolidada' },
+      { year: 2017, score: 85, ndvi_proxy: 0.73, osavi_proxy: 0.68, soil_moisture: 0.73, embedding_change: 1.0, label: 'Ano base produtivo' },
+      { year: 2018, score: 87, ndvi_proxy: 0.75, osavi_proxy: 0.7, soil_moisture: 0.7, embedding_change: 0.98, label: 'Expansão de área' },
+      { year: 2019, score: 82, ndvi_proxy: 0.7, osavi_proxy: 0.66, soil_moisture: 0.66, embedding_change: 0.92, label: 'Estiagem no Matopiba' },
+      { year: 2020, score: 79, ndvi_proxy: 0.68, osavi_proxy: 0.64, soil_moisture: 0.49, embedding_change: 0.90, label: 'Seca regional prolongada' },
+      { year: 2021, score: 84, ndvi_proxy: 0.72, osavi_proxy: 0.67, soil_moisture: 0.36, embedding_change: 0.94, label: 'Clima favorável' },
+      { year: 2022, score: 89, ndvi_proxy: 0.77, osavi_proxy: 0.72, soil_moisture: 0.63, embedding_change: 0.96, label: 'Safra recorde de soja' },
+      { year: 2023, score: 88, ndvi_proxy: 0.76, osavi_proxy: 0.71, soil_moisture: 0.33, embedding_change: 0.96, label: 'Manejo otimizado' },
+      { year: 2024, score: 86, ndvi_proxy: 0.74, osavi_proxy: 0.69, soil_moisture: 0.49, embedding_change: 0.95, label: 'Produção consolidada' },
     ],
     current_score: 86,
     status: 'productive',
@@ -451,14 +464,14 @@ export const MOCK_PROPERTIES: PropertyData[] = [
       [-7.780, -46.180],
     ],
     scores: [
-      { year: 2017, score: 58, ndvi_proxy: 0.50, embedding_change: 1.0, label: 'Pastagem de baixo vigor' },
-      { year: 2018, score: 54, ndvi_proxy: 0.45, embedding_change: 0.88, label: 'Degradação inicial' },
-      { year: 2019, score: 49, ndvi_proxy: 0.40, embedding_change: 0.78, label: 'Invasoras detectadas' },
-      { year: 2020, score: 42, ndvi_proxy: 0.35, embedding_change: 0.69, label: 'Déficit hídrico agravante' },
-      { year: 2021, score: 38, ndvi_proxy: 0.30, embedding_change: 0.64, label: 'Ponto crítico' },
-      { year: 2022, score: 41, ndvi_proxy: 0.33, embedding_change: 0.68, label: 'Intervenção no solo' },
-      { year: 2023, score: 45, ndvi_proxy: 0.38, embedding_change: 0.73, label: 'Recuperação tímida' },
-      { year: 2024, score: 47, ndvi_proxy: 0.40, embedding_change: 0.75, label: 'Sinais de melhora' },
+      { year: 2017, score: 58, ndvi_proxy: 0.5, osavi_proxy: 0.48, soil_moisture: 0.68, embedding_change: 1.0, label: 'Pastagem de baixo vigor' },
+      { year: 2018, score: 54, ndvi_proxy: 0.45, osavi_proxy: 0.44, soil_moisture: 0.64, embedding_change: 0.88, label: 'Degradação inicial' },
+      { year: 2019, score: 49, ndvi_proxy: 0.4, osavi_proxy: 0.39, soil_moisture: 0.6, embedding_change: 0.78, label: 'Invasoras detectadas' },
+      { year: 2020, score: 42, ndvi_proxy: 0.35, osavi_proxy: 0.35, soil_moisture: 0.42, embedding_change: 0.69, label: 'Déficit hídrico agravante' },
+      { year: 2021, score: 38, ndvi_proxy: 0.3, osavi_proxy: 0.3, soil_moisture: 0.28, embedding_change: 0.64, label: 'Ponto crítico' },
+      { year: 2022, score: 41, ndvi_proxy: 0.33, osavi_proxy: 0.33, soil_moisture: 0.55, embedding_change: 0.68, label: 'Intervenção no solo' },
+      { year: 2023, score: 45, ndvi_proxy: 0.38, osavi_proxy: 0.37, soil_moisture: 0.26, embedding_change: 0.73, label: 'Recuperação tímida' },
+      { year: 2024, score: 47, ndvi_proxy: 0.4, osavi_proxy: 0.39, soil_moisture: 0.42, embedding_change: 0.75, label: 'Sinais de melhora' },
     ],
     current_score: 47,
     status: 'recovering',
@@ -500,14 +513,14 @@ export const MOCK_PROPERTIES: PropertyData[] = [
       [-16.580, -54.680],
     ],
     scores: [
-      { year: 2017, score: 71, ndvi_proxy: 0.61, embedding_change: 1.0, label: 'Sistemas tradicionais' },
-      { year: 2018, score: 68, ndvi_proxy: 0.58, embedding_change: 0.90, label: 'Queda de produtividade' },
-      { year: 2019, score: 63, ndvi_proxy: 0.53, embedding_change: 0.85, label: 'Problemas de nematoides' },
-      { year: 2020, score: 55, ndvi_proxy: 0.46, embedding_change: 0.79, label: 'Impacto severo' },
-      { year: 2021, score: 52, ndvi_proxy: 0.43, embedding_change: 0.74, label: 'Solo fadigado' },
-      { year: 2022, score: 50, ndvi_proxy: 0.41, embedding_change: 0.71, label: 'Perda de rentabilidade' },
-      { year: 2023, score: 48, ndvi_proxy: 0.39, embedding_change: 0.68, label: 'Limiar de viabilidade' },
-      { year: 2024, score: 45, ndvi_proxy: 0.37, embedding_change: 0.65, label: 'Transição para agricultura regenerativa' },
+      { year: 2017, score: 71, ndvi_proxy: 0.61, osavi_proxy: 0.58, soil_moisture: 0.7, embedding_change: 1.0, label: 'Sistemas tradicionais' },
+      { year: 2018, score: 68, ndvi_proxy: 0.58, osavi_proxy: 0.55, soil_moisture: 0.67, embedding_change: 0.90, label: 'Queda de produtividade' },
+      { year: 2019, score: 63, ndvi_proxy: 0.53, osavi_proxy: 0.51, soil_moisture: 0.63, embedding_change: 0.85, label: 'Problemas de nematoides' },
+      { year: 2020, score: 55, ndvi_proxy: 0.46, osavi_proxy: 0.44, soil_moisture: 0.44, embedding_change: 0.79, label: 'Impacto severo' },
+      { year: 2021, score: 52, ndvi_proxy: 0.43, osavi_proxy: 0.42, soil_moisture: 0.31, embedding_change: 0.74, label: 'Solo fadigado' },
+      { year: 2022, score: 50, ndvi_proxy: 0.41, osavi_proxy: 0.4, soil_moisture: 0.56, embedding_change: 0.71, label: 'Perda de rentabilidade' },
+      { year: 2023, score: 48, ndvi_proxy: 0.39, osavi_proxy: 0.38, soil_moisture: 0.26, embedding_change: 0.68, label: 'Limiar de viabilidade' },
+      { year: 2024, score: 45, ndvi_proxy: 0.37, osavi_proxy: 0.37, soil_moisture: 0.41, embedding_change: 0.65, label: 'Transição para agricultura regenerativa' },
     ],
     current_score: 45,
     status: 'declining',
@@ -528,6 +541,7 @@ export const MOCK_PROPERTIES: PropertyData[] = [
         title: 'Uso de plantas de cobertura e crotalária',
         description: 'Implementação de culturas para quebra do ciclo de pragas e doenças do solo, e melhoria estrutural e biológica do solo.',
         estimated_impact: 'Redução de 80% na população de nematoides',
+        traits: { scientificName: 'Crotalaria spectabilis', rootDepth: 'Média (até 0.8m)', waterNeeds: 'low' },
       }
     ],
   },
@@ -563,3 +577,37 @@ export const SCORE_TO_STATUS = (score: number): PropertyStatus => {
   if (score >= 35) return 'recovering';
   return 'degraded';
 };
+
+// Rendimento histórico anual de soja (1982–2016) em sacas/ha, por estado.
+// Fonte: GDHY — Global Dataset of Historical Yields v1.2+v1.3 (Iizumi et al.),
+// grade global 0,5°, unidade original t/ha, convertida para sacas/ha (× 1000 / 60).
+// Média das células de grade com soja mapeada dentro de cada estado.
+// PANGAEA: https://doi.pangaea.de/10.1594/PANGAEA.909132
+// Nota: a máscara de área do GDHY não cobre a soja do Maranhão (MA), por isso o
+// estado não aparece nesta série histórica; o Pará (PA) tem cobertura só até 2010.
+export interface HistoricalYieldData {
+  year: number;
+  yield_sc_ha: number;
+}
+
+export const REGIONAL_HISTORICAL_YIELDS: Record<string, HistoricalYieldData[]> = {
+  MT: [
+    { year: 1982, yield_sc_ha: 28.7 }, { year: 1983, yield_sc_ha: 31.5 }, { year: 1984, yield_sc_ha: 31.2 }, { year: 1985, yield_sc_ha: 31.4 }, { year: 1986, yield_sc_ha: 30.8 }, { year: 1987, yield_sc_ha: 35.6 }, { year: 1988, yield_sc_ha: 29.3 }, { year: 1989, yield_sc_ha: 37.2 }, { year: 1990, yield_sc_ha: 31.3 }, { year: 1991, yield_sc_ha: 29.3 }, { year: 1992, yield_sc_ha: 36.0 }, { year: 1993, yield_sc_ha: 39.5 }, { year: 1994, yield_sc_ha: 38.8 }, { year: 1995, yield_sc_ha: 39.1 }, { year: 1996, yield_sc_ha: 44.1 }, { year: 1997, yield_sc_ha: 41.3 }, { year: 1998, yield_sc_ha: 45.7 }, { year: 1999, yield_sc_ha: 41.8 }, { year: 2000, yield_sc_ha: 44.5 }, { year: 2001, yield_sc_ha: 55.6 }, { year: 2002, yield_sc_ha: 47.4 }, { year: 2003, yield_sc_ha: 52.3 }, { year: 2004, yield_sc_ha: 38.3 }, { year: 2005, yield_sc_ha: 43.6 }, { year: 2006, yield_sc_ha: 40.8 }, { year: 2007, yield_sc_ha: 51.4 }, { year: 2008, yield_sc_ha: 45.7 }, { year: 2009, yield_sc_ha: 46.1 }, { year: 2010, yield_sc_ha: 52.4 }, { year: 2011, yield_sc_ha: 50.5 }, { year: 2012, yield_sc_ha: 46.7 }, { year: 2013, yield_sc_ha: 49.1 }, { year: 2014, yield_sc_ha: 46.6 }, { year: 2015, yield_sc_ha: 57.4 }, { year: 2016, yield_sc_ha: 53.6 }
+  ],
+  GO: [
+    { year: 1982, yield_sc_ha: 22.1 }, { year: 1983, yield_sc_ha: 22.6 }, { year: 1984, yield_sc_ha: 24.6 }, { year: 1985, yield_sc_ha: 24.2 }, { year: 1986, yield_sc_ha: 24.1 }, { year: 1987, yield_sc_ha: 27.6 }, { year: 1988, yield_sc_ha: 22.7 }, { year: 1989, yield_sc_ha: 29.0 }, { year: 1990, yield_sc_ha: 23.9 }, { year: 1991, yield_sc_ha: 21.4 }, { year: 1992, yield_sc_ha: 26.0 }, { year: 1993, yield_sc_ha: 29.1 }, { year: 1994, yield_sc_ha: 26.7 }, { year: 1995, yield_sc_ha: 31.2 }, { year: 1996, yield_sc_ha: 36.2 }, { year: 1997, yield_sc_ha: 31.9 }, { year: 1998, yield_sc_ha: 37.4 }, { year: 1999, yield_sc_ha: 35.7 }, { year: 2000, yield_sc_ha: 38.4 }, { year: 2001, yield_sc_ha: 46.5 }, { year: 2002, yield_sc_ha: 41.0 }, { year: 2003, yield_sc_ha: 42.5 }, { year: 2004, yield_sc_ha: 31.4 }, { year: 2005, yield_sc_ha: 36.7 }, { year: 2006, yield_sc_ha: 34.4 }, { year: 2007, yield_sc_ha: 44.2 }, { year: 2008, yield_sc_ha: 40.5 }, { year: 2009, yield_sc_ha: 41.4 }, { year: 2010, yield_sc_ha: 49.0 }, { year: 2011, yield_sc_ha: 47.7 }, { year: 2012, yield_sc_ha: 42.4 }, { year: 2013, yield_sc_ha: 44.5 }, { year: 2014, yield_sc_ha: 43.1 }, { year: 2015, yield_sc_ha: 51.7 }, { year: 2016, yield_sc_ha: 46.6 }
+  ],
+  BA: [
+    { year: 1982, yield_sc_ha: 18.9 }, { year: 1983, yield_sc_ha: 17.4 }, { year: 1984, yield_sc_ha: 20.3 }, { year: 1985, yield_sc_ha: 19.6 }, { year: 1986, yield_sc_ha: 18.3 }, { year: 1987, yield_sc_ha: 20.5 }, { year: 1988, yield_sc_ha: 18.2 }, { year: 1989, yield_sc_ha: 23.7 }, { year: 1990, yield_sc_ha: 19.8 }, { year: 1991, yield_sc_ha: 17.1 }, { year: 1992, yield_sc_ha: 19.9 }, { year: 1993, yield_sc_ha: 24.4 }, { year: 1994, yield_sc_ha: 22.6 }, { year: 1995, yield_sc_ha: 28.1 }, { year: 1996, yield_sc_ha: 31.0 }, { year: 1997, yield_sc_ha: 26.8 }, { year: 1998, yield_sc_ha: 31.9 }, { year: 1999, yield_sc_ha: 33.0 }, { year: 2000, yield_sc_ha: 35.3 }, { year: 2001, yield_sc_ha: 40.3 }, { year: 2002, yield_sc_ha: 35.9 }, { year: 2003, yield_sc_ha: 37.6 }, { year: 2004, yield_sc_ha: 27.7 }, { year: 2005, yield_sc_ha: 31.5 }, { year: 2006, yield_sc_ha: 29.3 }, { year: 2007, yield_sc_ha: 39.8 }, { year: 2008, yield_sc_ha: 35.5 }, { year: 2009, yield_sc_ha: 36.3 }, { year: 2010, yield_sc_ha: 43.7 }, { year: 2011, yield_sc_ha: 43.7 }, { year: 2012, yield_sc_ha: 36.2 }, { year: 2013, yield_sc_ha: 39.5 }, { year: 2014, yield_sc_ha: 36.6 }, { year: 2015, yield_sc_ha: 46.4 }, { year: 2016, yield_sc_ha: 40.9 }
+  ],
+  PA: [
+    { year: 1982, yield_sc_ha: 40.7 }, { year: 1983, yield_sc_ha: 43.8 }, { year: 1984, yield_sc_ha: 44.4 }, { year: 1985, yield_sc_ha: 42.7 }, { year: 1986, yield_sc_ha: 39.0 }, { year: 1987, yield_sc_ha: 49.9 }, { year: 1988, yield_sc_ha: 36.7 }, { year: 1989, yield_sc_ha: 51.0 }, { year: 1990, yield_sc_ha: 38.9 }, { year: 1991, yield_sc_ha: 38.6 }, { year: 1992, yield_sc_ha: 49.9 }, { year: 1993, yield_sc_ha: 52.0 }, { year: 1994, yield_sc_ha: 53.7 }, { year: 1995, yield_sc_ha: 53.4 }, { year: 1996, yield_sc_ha: 60.2 }, { year: 1997, yield_sc_ha: 59.4 }, { year: 1998, yield_sc_ha: 63.4 }, { year: 1999, yield_sc_ha: 57.9 }, { year: 2000, yield_sc_ha: 61.7 }, { year: 2001, yield_sc_ha: 77.3 }, { year: 2002, yield_sc_ha: 68.3 }, { year: 2003, yield_sc_ha: 73.2 }, { year: 2004, yield_sc_ha: 52.7 }, { year: 2005, yield_sc_ha: 57.0 }, { year: 2006, yield_sc_ha: 52.8 }, { year: 2007, yield_sc_ha: 73.7 }, { year: 2008, yield_sc_ha: 60.5 }, { year: 2009, yield_sc_ha: 58.2 }, { year: 2010, yield_sc_ha: 70.0 }
+  ],
+  MG: [
+    { year: 1982, yield_sc_ha: 22.4 }, { year: 1983, yield_sc_ha: 23.3 }, { year: 1984, yield_sc_ha: 24.4 }, { year: 1985, yield_sc_ha: 24.4 }, { year: 1986, yield_sc_ha: 23.1 }, { year: 1987, yield_sc_ha: 25.8 }, { year: 1988, yield_sc_ha: 24.1 }, { year: 1989, yield_sc_ha: 28.6 }, { year: 1990, yield_sc_ha: 24.7 }, { year: 1991, yield_sc_ha: 20.4 }, { year: 1992, yield_sc_ha: 25.7 }, { year: 1993, yield_sc_ha: 28.8 }, { year: 1994, yield_sc_ha: 27.7 }, { year: 1995, yield_sc_ha: 32.4 }, { year: 1996, yield_sc_ha: 35.1 }, { year: 1997, yield_sc_ha: 32.0 }, { year: 1998, yield_sc_ha: 36.4 }, { year: 1999, yield_sc_ha: 35.4 }, { year: 2000, yield_sc_ha: 36.8 }, { year: 2001, yield_sc_ha: 44.2 }, { year: 2002, yield_sc_ha: 38.8 }, { year: 2003, yield_sc_ha: 40.7 }, { year: 2004, yield_sc_ha: 31.3 }, { year: 2005, yield_sc_ha: 34.8 }, { year: 2006, yield_sc_ha: 33.2 }, { year: 2007, yield_sc_ha: 41.0 }, { year: 2008, yield_sc_ha: 39.8 }, { year: 2009, yield_sc_ha: 39.3 }, { year: 2010, yield_sc_ha: 46.3 }, { year: 2011, yield_sc_ha: 46.4 }, { year: 2012, yield_sc_ha: 40.7 }, { year: 2013, yield_sc_ha: 42.4 }, { year: 2014, yield_sc_ha: 42.2 }, { year: 2015, yield_sc_ha: 50.8 }, { year: 2016, yield_sc_ha: 44.6 }
+  ],
+  MS: [
+    { year: 1982, yield_sc_ha: 24.7 }, { year: 1983, yield_sc_ha: 28.6 }, { year: 1984, yield_sc_ha: 27.3 }, { year: 1985, yield_sc_ha: 29.7 }, { year: 1986, yield_sc_ha: 25.3 }, { year: 1987, yield_sc_ha: 31.8 }, { year: 1988, yield_sc_ha: 28.7 }, { year: 1989, yield_sc_ha: 31.8 }, { year: 1990, yield_sc_ha: 29.8 }, { year: 1991, yield_sc_ha: 26.7 }, { year: 1992, yield_sc_ha: 34.1 }, { year: 1993, yield_sc_ha: 34.9 }, { year: 1994, yield_sc_ha: 36.0 }, { year: 1995, yield_sc_ha: 37.2 }, { year: 1996, yield_sc_ha: 38.4 }, { year: 1997, yield_sc_ha: 36.7 }, { year: 1998, yield_sc_ha: 38.4 }, { year: 1999, yield_sc_ha: 38.8 }, { year: 2000, yield_sc_ha: 38.2 }, { year: 2001, yield_sc_ha: 44.3 }, { year: 2002, yield_sc_ha: 41.1 }, { year: 2003, yield_sc_ha: 42.5 }, { year: 2004, yield_sc_ha: 36.1 }, { year: 2005, yield_sc_ha: 35.4 }, { year: 2006, yield_sc_ha: 37.0 }, { year: 2007, yield_sc_ha: 41.5 }, { year: 2008, yield_sc_ha: 43.3 }, { year: 2009, yield_sc_ha: 42.4 }, { year: 2010, yield_sc_ha: 47.9 }, { year: 2011, yield_sc_ha: 48.3 }, { year: 2012, yield_sc_ha: 45.3 }, { year: 2013, yield_sc_ha: 46.5 }, { year: 2014, yield_sc_ha: 44.1 }, { year: 2015, yield_sc_ha: 48.3 }, { year: 2016, yield_sc_ha: 45.0 }
+  ]
+};
+

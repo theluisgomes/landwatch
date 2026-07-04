@@ -11,6 +11,8 @@ const initialState = {
   analysisOpen: false,
   drawingMode: false,
   properties: MOCK_PROPERTIES,
+  selectedIndex: 'score' as 'score' | 'ndvi' | 'osavi',
+  ndviLayerVisible: false,
 };
 
 class SimpleStore {
@@ -45,6 +47,8 @@ export const openAnalysis = (property: PropertyData) => store.setState({ selecte
 export const closeAnalysis = () => store.setState({ analysisOpen: false });
 export const setDrawingMode = (enabled: boolean) => store.setState({ drawingMode: enabled });
 export const toggleTheme = () => store.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }));
+export const setSelectedIndex = (index: 'score' | 'ndvi' | 'osavi') => store.setState({ selectedIndex: index });
+export const toggleNdviLayer = () => store.setState(s => ({ ndviLayerVisible: !s.ndviLayerVisible }));
 
 export function useStore() {
   const [state, setState] = useState(store.getState());
@@ -66,5 +70,7 @@ export function useStore() {
     closeAnalysis,
     setDrawingMode,
     toggleTheme,
+    setSelectedIndex,
+    toggleNdviLayer,
   };
 }

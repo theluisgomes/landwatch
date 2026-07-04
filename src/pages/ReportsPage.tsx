@@ -13,7 +13,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ReferenceLine,
 } from 'recharts';
-import { MOCK_PROPERTIES, DASHBOARD_STATS, STATUS_COLORS, PropertyData, PropertyStatus } from '../lib/mockData';
+import { MOCK_PROPERTIES, DASHBOARD_STATS, STATUS_COLORS, PropertyData, PropertyStatus, REGIONAL_HISTORICAL_YIELDS } from '../lib/mockData';
 import { setView } from '../lib/store';
 import { Sprout } from 'lucide-react';
 
@@ -796,6 +796,50 @@ function ComparisonTab() {
               dot={{ r: 4, fill: '#22c55e', stroke: '#0a1a0f', strokeWidth: 2 }}
               activeDot={{ r: 6, fill: '#22c55e', stroke: '#0a1a0f', strokeWidth: 2 }}
             />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Produtividade vs. Histórico Regional (1981-2016) — LineChart */}
+      <div className="glass rounded-xl p-4 border border-forest-700/40 w-full">
+        <SectionTitle>
+          Evolução Histórica da Produtividade Regional (1982–2016)
+          <InfoTooltip text="Rendimento anual real de soja em sacas por hectare por estado do portfolio, do GDHY (Global Dataset of Historical Yields, Iizumi et al.) — grade global 0,5° derivada de séries de campo e satélite, convertida de t/ha para sc/ha. Média das células com soja mapeada em cada estado. O Maranhão não é exibido por falta de cobertura na máscara do GDHY, e o Pará tem dados até 2010." />
+        </SectionTitle>
+        <ResponsiveContainer width="100%" height={200}>
+          <LineChart margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(45,106,79,0.2)" vertical={false} />
+            <XAxis dataKey="year" type="number" domain={[1982, 2016]} ticks={[1982, 1990, 1998, 2006, 2016]} tick={{ fill: '#74c69d', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+            <YAxis domain={[0, 70]} tick={{ fill: '#74c69d', fontSize: 10 }} axisLine={false} tickLine={false} label={{ value: 'sc/ha', angle: -90, position: 'insideLeft', offset: 10, fill: '#74c69d', fontSize: 9 }} />
+            <Tooltip
+              contentStyle={tooltipStyle}
+              formatter={(v: number, name: string) => [v + ' sc/ha', name]}
+            />
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: '#74c69d', paddingTop: 8 }} />
+            {Object.entries(REGIONAL_HISTORICAL_YIELDS).map(([state, data], index) => {
+              const colors = ['#22c55e', '#60a5fa', '#f59e0b', '#ec4899', '#a855f7', '#14b8a6', '#f43f5e'];
+              const color = colors[index % colors.length];
+              const stateName = state === 'MT' ? 'Mato Grosso' :
+                                state === 'GO' ? 'Goiás' :
+                                state === 'BA' ? 'Bahia (Matopiba)' :
+                                state === 'PA' ? 'Pará' :
+                                state === 'MG' ? 'Minas Gerais' :
+                                state === 'MS' ? 'Mato Grosso do Sul' :
+                                state === 'MA' ? 'Maranhão' : state;
+              return (
+                <Line
+                  key={state}
+                  data={data}
+                  dataKey="yield_sc_ha"
+                  name={stateName}
+                  stroke={color}
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 5, strokeWidth: 1 }}
+                  type="monotone"
+                />
+              );
+            })}
           </LineChart>
         </ResponsiveContainer>
       </div>

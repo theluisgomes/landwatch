@@ -12,7 +12,8 @@ export function LandWatchMap({ onPropertyClick }: LandWatchMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layersRef = useRef<(L.Layer)[]>([]);
-  const { selectedYear, selectedProperty } = useStore();
+  const ndviLayerRef = useRef<L.TileLayer | null>(null);
+  const { selectedYear, selectedProperty, selectedIndex, ndviLayerVisible } = useStore();
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -63,7 +64,7 @@ export function LandWatchMap({ onPropertyClick }: LandWatchMapProps) {
     };
   }, []);
 
-  // Re-render properties when year or selection changes
+  // Re-render properties when year, selection, or index changes
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     // Clear existing layers
@@ -72,7 +73,35 @@ export function LandWatchMap({ onPropertyClick }: LandWatchMapProps) {
     });
     layersRef.current = [];
     renderProperties(mapInstanceRef.current, selectedYear, selectedProperty?.id ?? null);
-  }, [selectedYear, selectedProperty]);
+  }, [selectedYear, selectedProperty, selectedIndex]);
+
+  // Toggle / update the NASA GIBS MODIS NDVI overlay (real satellite data, keyless WMTS).
+  // Monthly composite tied to the selected year; sits above the basemap, below the parcels.
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    if (ndviLayerRef.current) {
+      map.removeLayer(ndviLayerRef.current);
+      ndviLayerRef.current = null;
+    }
+
+    if (ndviLayerVisible) {
+      // January composite = peak wet-season greenness in the Cerrado/Amazônia.
+      const time = `${selectedYear}-01-01`;
+      const layer = L.tileLayer(
+        `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_L3_NDVI_Monthly/default/${time}/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png`,
+        {
+          maxZoom: 9,
+          opacity: 0.7,
+          zIndex: 5,
+          attribution: 'NDVI: NASA EOSDIS GIBS / MODIS Terra',
+        }
+      );
+      layer.addTo(map);
+      ndviLayerRef.current = layer;
+    }
+  }, [ndviLayerVisible, selectedYear]);
 
   const renderProperties = (map: L.Map, year: number, selectedId: string | null) => {
     const newLayers: L.Layer[] = [];
@@ -80,12 +109,16 @@ export function LandWatchMap({ onPropertyClick }: LandWatchMapProps) {
     MOCK_PROPERTIES.forEach(property => {
       const yearData = property.scores.find(s => s.year === year) || property.scores[property.scores.length - 1];
       const score = yearData?.score ?? property.current_score;
+      
+      const activeValue = selectedIndex === 'score'
+        ? score
+        : Math.round((selectedIndex === 'ndvi' ? yearData.ndvi_proxy : yearData.osavi_proxy) * 100);
 
-      // Calculate status for selected year
+      // Calculate status based on selected index value
       let status = property.status;
-      if (score >= 70) status = 'productive';
-      else if (score >= 50) status = 'declining';
-      else if (score >= 35) status = 'recovering';
+      if (activeValue >= 70) status = 'productive';
+      else if (activeValue >= 50) status = 'declining';
+      else if (activeValue >= 35) status = 'recovering';
       else status = 'degraded';
 
       const colors = STATUS_COLORS[status];
@@ -103,10 +136,14 @@ export function LandWatchMap({ onPropertyClick }: LandWatchMapProps) {
       });
 
       // Tooltip
+      const indexText = selectedIndex === 'score'
+        ? `Score: ${score}`
+        : `Score: ${score} | ${selectedIndex.toUpperCase()}: ${(selectedIndex === 'ndvi' ? yearData.ndvi_proxy : yearData.osavi_proxy).toFixed(2)}`;
+
       polygon.bindTooltip(
         `<div style="font-family: Inter, sans-serif;">
           <strong style="color: white; font-size: 12px;">${property.name}</strong><br/>
-          <span style="color: ${colors.stroke}; font-weight: 600; font-size: 14px;">Score ${year}: ${score}</span><br/>
+          <span style="color: ${colors.stroke}; font-weight: 600; font-size: 14px;">${indexText}</span><br/>
           <span style="color: rgba(180,220,200,0.7); font-size: 11px;">${property.area_ha.toLocaleString('pt-BR')} ha · ${property.municipality}, ${property.state}</span>
         </div>`,
         { sticky: true, direction: 'top', opacity: 1 }
@@ -140,7 +177,7 @@ export function LandWatchMap({ onPropertyClick }: LandWatchMapProps) {
           white-space: nowrap;
           backdrop-filter: blur(8px);
           box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-        ">${score}</div>`,
+        ">${activeValue}</div>`,
         iconSize: [36, 22],
         iconAnchor: [18, 11],
       });

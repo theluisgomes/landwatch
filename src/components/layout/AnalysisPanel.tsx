@@ -12,7 +12,7 @@ interface AnalysisPanelProps {
 }
 
 export function AnalysisPanel({ property }: AnalysisPanelProps) {
-  const { selectedYear } = useStore();
+  const { selectedYear, selectedIndex } = useStore();
   const [section, setSection] = useState<'overview' | 'history' | 'recommendations'>('overview');
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
 
@@ -67,7 +67,13 @@ export function AnalysisPanel({ property }: AnalysisPanelProps) {
               <div className="text-xs text-forest-400">{yearData.label}</div>
               <div className="flex items-center gap-1.5 mt-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                <span className="text-xs font-mono text-blue-300">NDVI {yearData.ndvi_proxy.toFixed(2)}</span>
+                <span className="text-xs font-mono text-blue-300">
+                  {(selectedIndex === 'score' ? 'ndvi' : selectedIndex).toUpperCase()} {(selectedIndex === 'osavi' ? yearData.osavi_proxy : yearData.ndvi_proxy).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <span className="text-xs font-mono text-cyan-300">Umidade Solo {yearData.soil_moisture.toFixed(2)}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
@@ -118,6 +124,18 @@ export function AnalysisPanel({ property }: AnalysisPanelProps) {
                 <MetricCard
                   label="CAR"
                   value={property.car_number.slice(-8) + '...'}
+                  small
+                />
+                <MetricCard
+                  label="Umidade do Solo"
+                  value={yearData ? `${Math.round(yearData.soil_moisture * 100)}` : 'N/A'}
+                  suffix="%"
+                  color={yearData ? (yearData.soil_moisture >= 0.5 ? 'text-blue-400' : yearData.soil_moisture >= 0.35 ? 'text-amber-400' : 'text-red-400') : 'text-white'}
+                />
+                <MetricCard
+                  label="Status Hídrico"
+                  value={yearData ? (yearData.soil_moisture >= 0.5 ? 'Adequado' : yearData.soil_moisture >= 0.35 ? 'Atenção' : 'Crítico') : 'N/A'}
+                  color={yearData ? (yearData.soil_moisture >= 0.5 ? 'text-green-400' : yearData.soil_moisture >= 0.35 ? 'text-amber-400' : 'text-red-400') : 'text-white'}
                   small
                 />
                 <MetricCard

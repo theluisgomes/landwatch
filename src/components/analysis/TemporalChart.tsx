@@ -16,7 +16,7 @@ interface TemporalChartProps {
   property: PropertyData;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, selectedIndex }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const score = data.score;
@@ -24,8 +24,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     if (score < 50) color = '#ef4444';
     else if (score < 70) color = '#f59e0b';
 
+    const activeIndexVal = selectedIndex === 'osavi' ? data.osavi_proxy : data.ndvi_proxy;
+    const activeIndexName = selectedIndex === 'score' ? 'NDVI' : selectedIndex.toUpperCase();
+
     return (
-      <div className="glass rounded-lg p-3 text-xs min-w-[160px]">
+      <div className="glass rounded-lg p-3 text-xs min-w-[170px]">
         <div className="font-semibold text-forest-100 mb-1">{label}</div>
         <div className="flex items-center gap-2 mb-1">
           <div className="w-2 h-2 rounded-full" style={{ background: color }} />
@@ -34,8 +37,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         </div>
         <div className="flex items-center gap-2 mb-1">
           <div className="w-2 h-2 rounded-full bg-blue-400" />
-          <span className="text-forest-300">NDVI:</span>
-          <span className="text-blue-300 font-mono">{data.ndvi_proxy.toFixed(2)}</span>
+          <span className="text-forest-300">{activeIndexName}:</span>
+          <span className="text-blue-300 font-mono">{activeIndexVal.toFixed(2)}</span>
+        </div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-2 h-2 rounded-full bg-cyan-400" />
+          <span className="text-forest-300">Umidade Solo:</span>
+          <span className="text-cyan-300 font-mono">{data.soil_moisture.toFixed(2)}</span>
         </div>
         <div className="text-forest-400 mt-1 italic">{data.label}</div>
       </div>
@@ -71,13 +79,19 @@ const CustomDot = ({ cx, cy, payload, selectedYear }: any) => {
 };
 
 export function TemporalChart({ property }: TemporalChartProps) {
-  const { selectedYear, setYear } = useStore();
-  const data = property.scores;
+  const { selectedYear, setYear, selectedIndex } = useStore();
+  
+  const chartData = property.scores.map(s => ({
+    ...s,
+    ndvi_scaled: s.ndvi_proxy * 100,
+    osavi_scaled: s.osavi_proxy * 100,
+    soil_moisture_scaled: s.soil_moisture * 100,
+  }));
 
   // Score categories for background zones
-  const minScore = Math.min(...data.map(d => d.score));
-  const maxScore = Math.max(...data.map(d => d.score));
-  const trend = data[data.length - 1].score - data[0].score;
+  const minScore = Math.min(...property.scores.map(d => d.score));
+  const maxScore = Math.max(...property.scores.map(d => d.score));
+  const trend = property.scores[property.scores.length - 1].score - property.scores[0].score;
 
   return (
     <div className="w-full">
@@ -102,7 +116,7 @@ export function TemporalChart({ property }: TemporalChartProps) {
       {/* Chart */}
       <ResponsiveContainer width="100%" height={180}>
         <AreaChart
-          data={data}
+          data={chartData}
           margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
           onClick={(e) => {
             if (e && e.activePayload && e.activePayload[0]) {
@@ -118,6 +132,10 @@ export function TemporalChart({ property }: TemporalChartProps) {
             <linearGradient id="ndviGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.2} />
               <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="soilMoistureGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
             </linearGradient>
           </defs>
 
@@ -142,7 +160,7 @@ export function TemporalChart({ property }: TemporalChartProps) {
             ticks={[0, 30, 50, 70, 100]}
           />
 
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip selectedIndex={selectedIndex} />} />
 
           {/* Risk threshold lines */}
           <ReferenceLine y={70} stroke="rgba(34,197,94,0.4)" strokeDasharray="4 4" />
@@ -156,19 +174,30 @@ export function TemporalChart({ property }: TemporalChartProps) {
             strokeDasharray="3 3"
           />
 
-          {/* NDVI proxy area */}
+          {/* Selected vegetation proxy area */}
           <Area
             type="monotone"
-            dataKey="ndvi_proxy"
+            dataKey={selectedIndex === 'osavi' ? 'osavi_scaled' : 'ndvi_scaled'}
             stroke="#60a5fa"
             strokeWidth={1}
             fill="url(#ndviGradient)"
             strokeDasharray="3 3"
             dot={false}
-            name="NDVI"
+            name={selectedIndex === 'score' ? 'NDVI' : selectedIndex.toUpperCase()}
             yAxisId={0}
-            // Scale 0-1 to 0-100 for same axis
-            // We'll handle this by multiplying by 100 in data
+          />
+
+          {/* Soil Moisture proxy area */}
+          <Area
+            type="monotone"
+            dataKey="soil_moisture_scaled"
+            stroke="#22d3ee"
+            strokeWidth={1}
+            fill="url(#soilMoistureGradient)"
+            strokeDasharray="4 4"
+            dot={false}
+            name="Umidade do Solo"
+            yAxisId={0}
           />
 
           {/* Score area */}
@@ -187,7 +216,7 @@ export function TemporalChart({ property }: TemporalChartProps) {
 
       {/* Year selector */}
       <div className="mt-2 flex items-center gap-1 justify-center">
-        {data.map((d) => (
+        {chartData.map((d) => (
           <button
             key={d.year}
             onClick={() => setYear(d.year)}

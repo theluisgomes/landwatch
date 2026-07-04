@@ -57,6 +57,25 @@ export function RecoveryRecommendations({ recommendations }: RecoveryRecommendat
                   <span className="text-forest-500">Impacto estimado:</span>
                   <span className="text-green-400 font-medium">{rec.estimated_impact}</span>
                 </div>
+                {rec.traits && (
+                  <div className="mt-2 pt-1.5 border-t border-forest-800/60 grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px]">
+                    {rec.traits.scientificName && (
+                      <div className="col-span-2 text-forest-300">
+                        <span className="text-forest-500 font-semibold">Espécie:</span> <span className="italic">{rec.traits.scientificName}</span>
+                      </div>
+                    )}
+                    {rec.traits.rootDepth && (
+                      <div className="text-forest-400">
+                        <span className="text-forest-500 font-semibold">Raízes:</span> {rec.traits.rootDepth}
+                      </div>
+                    )}
+                    {rec.traits.waterNeeds && (
+                      <div className="text-forest-400">
+                        <span className="text-forest-500 font-semibold">Demanda Hídrica:</span> {rec.traits.waterNeeds === 'low' ? 'Baixa' : rec.traits.waterNeeds === 'medium' ? 'Média' : 'Alta'}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

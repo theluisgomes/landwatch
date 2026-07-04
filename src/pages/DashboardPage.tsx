@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Satellite, Plus, Minus, RotateCcw, Filter, Calendar, Layers as LayersIcon } from 'lucide-react';
+import { Satellite, Plus, Minus, RotateCcw, Filter, Calendar, Layers as LayersIcon, Leaf } from 'lucide-react';
 import { LandWatchMap } from '../components/map/LandWatchMap';
 import { Sidebar } from '../components/layout/Sidebar';
 import { AnalysisPanel } from '../components/layout/AnalysisPanel';
@@ -7,7 +7,7 @@ import { useStore, setYear } from '../lib/store';
 import { DASHBOARD_STATS, STATUS_COLORS } from '../lib/mockData';
 
 export function DashboardPage() {
-  const { selectedProperty, analysisOpen, selectedYear } = useStore();
+  const { selectedProperty, analysisOpen, selectedYear, selectedIndex, setSelectedIndex, ndviLayerVisible, toggleNdviLayer } = useStore();
   const [showLegend, setShowLegend] = useState(true);
 
   const years = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
@@ -51,17 +51,73 @@ export function DashboardPage() {
           </div>
 
           {/* Map controls */}
-          <div className="glass rounded-xl p-2 flex flex-col gap-1">
+          <div className="glass rounded-xl p-2 flex flex-col gap-1.5">
             <button
               onClick={() => setShowLegend(v => !v)}
-              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all ${
-                showLegend ? 'bg-green-500/15 text-green-400' : 'text-forest-400 hover:text-forest-200'
-              }`}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all ${showLegend ? 'bg-green-500/15 text-green-400' : 'text-forest-400 hover:text-forest-200'
+                }`}
             >
               <LayersIcon size={13} />
               Legenda
             </button>
+            <button
+              onClick={toggleNdviLayer}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all ${ndviLayerVisible ? 'bg-green-500/15 text-green-400' : 'text-forest-400 hover:text-forest-200'
+                }`}
+              title="Camada de NDVI real do satélite MODIS/Terra (NASA GIBS) para o ano selecionado"
+            >
+              <Leaf size={13} />
+              NDVI satélite
+            </button>
+            <div className="border-t border-forest-700/50 my-1" />
+            <div className="text-[10px] text-forest-500 font-semibold px-1 uppercase tracking-wider">Índice</div>
+            <div className="flex flex-col gap-1">
+              <button
+                onClick={() => setSelectedIndex('score')}
+                className={`text-left px-2 py-1 rounded text-xs font-mono transition-all ${selectedIndex === 'score' ? 'bg-green-500/15 text-green-400 font-bold' : 'text-forest-400 hover:text-forest-200'
+                  }`}
+              >
+                Score
+              </button>
+              <button
+                onClick={() => setSelectedIndex('ndvi')}
+                className={`text-left px-2 py-1 rounded text-xs font-mono transition-all ${selectedIndex === 'ndvi' ? 'bg-green-500/15 text-green-400 font-bold' : 'text-forest-400 hover:text-forest-200'
+                  }`}
+              >
+                NDVI
+              </button>
+              <button
+                onClick={() => setSelectedIndex('osavi')}
+                className={`text-left px-2 py-1 rounded text-xs font-mono transition-all ${selectedIndex === 'osavi' ? 'bg-green-500/15 text-green-400 font-bold' : 'text-forest-400 hover:text-forest-200'
+                  }`}
+                title="Optimized Soil Adjusted Vegetation Index"
+              >
+                OSAVI
+              </button>
+            </div>
           </div>
+
+          {/* NDVI satellite layer legend */}
+          {ndviLayerVisible && (
+            <div className="glass rounded-xl p-3">
+              <div className="text-[10px] text-forest-400 mb-1.5 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                <Leaf size={11} className="text-green-400" />
+                NDVI · MODIS/Terra · {selectedYear}
+              </div>
+              <div
+                className="h-2 rounded-full"
+                style={{ background: 'linear-gradient(to right, #bf8f4f, #dfca6a, #e8e8b0, #a6c96a, #4e9b3a, #1f6b1f)' }}
+              />
+              <div className="flex justify-between mt-1 text-[9px] text-forest-500 font-mono">
+                <span>0.0 solo</span>
+                <span>0.5</span>
+                <span>1.0 vegetação</span>
+              </div>
+              <div className="mt-1.5 text-[9px] text-forest-600 leading-tight">
+                Composição mensal real · NASA EOSDIS GIBS
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Year timeline slider */}
